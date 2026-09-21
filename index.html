@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>芋泥拼豆小铺</title>
+    <title>芋泥拼豆小铺 🎀</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
     <style>
@@ -19,15 +19,14 @@
 
         body {
             background-color: var(--hk-bg);
-            font-family: 'Nunito', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            font-family: 'Nunito', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
             -webkit-tap-highlight-color: transparent;
-            overscroll-behavior-y: none;
             background-image: radial-gradient(#FFD1DC 2px, transparent 2px);
             background-size: 30px 30px;
         }
         
         .app-container {
-            max-width: 480px;
+            max-width: 500px;
             margin: 0 auto;
             min-height: 100vh;
             background-color: rgba(255, 245, 247, 0.95);
@@ -37,7 +36,10 @@
             overflow-x: hidden;
         }
 
-        ::-webkit-scrollbar { width: 0px; height: 0px; background: transparent; }
+        /* Custom Scrollbar for cute containers */
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: #FFF0F3; border-radius: 10px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #FFB6C1; border-radius: 10px; }
 
         .sticker {
             display: flex;
@@ -45,55 +47,77 @@
             justify-content: center;
             background: white;
             border-radius: 50%;
-            width: 65px;
-            height: 65px;
-            font-size: 2.2rem;
+            width: 55px;
+            height: 55px;
+            font-size: 1.8rem;
             box-shadow: 0 6px 16px rgba(255, 182, 193, 0.4);
             border: 3px solid var(--taro-purple);
             position: absolute;
             z-index: 10;
-            transition: transform 0.3s ease;
         }
-        
-        .sticker:active { transform: scale(0.9); }
-        .sticker-tr { top: -20px; right: -10px; transform: rotate(10deg); }
-        .sticker-tl { top: -20px; left: -10px; transform: rotate(-15deg); }
+        .sticker-tr { top: -15px; right: -10px; transform: rotate(15deg); }
+        .sticker-tl { top: -15px; left: -10px; transform: rotate(-15deg); }
 
-        .wechat-capsule {
-            border: 1px solid rgba(0,0,0,0.08);
-            background: rgba(255,255,255,0.8);
-            backdrop-filter: blur(4px);
-        }
-
-        .color-grid-item.selected {
-            border: 3px solid var(--taro-dark);
-            transform: scale(1.15);
-            box-shadow: 0 4px 12px rgba(179, 157, 219, 0.5);
-            border-radius: 50%;
-        }
-        
         .card-pink {
             background: white;
-            border-radius: 32px;
-            padding: 24px;
-            box-shadow: 0 10px 30px rgba(255, 182, 193, 0.25);
+            border-radius: 28px;
+            padding: 20px;
+            box-shadow: 0 8px 25px rgba(255, 182, 193, 0.2);
             border: 2px solid var(--hk-pink);
             position: relative;
             margin-bottom: 24px;
         }
 
-        /* Loading spinner */
+        .color-card {
+            aspect-ratio: 1;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 900;
+            font-size: 11px;
+            cursor: pointer;
+            transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+            border: 2px solid rgba(0,0,0,0.05);
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            position: relative;
+            user-select: none;
+        }
+        .color-card:active { transform: scale(0.9); }
+        .color-card.selected {
+            transform: scale(1.1);
+            z-index: 10;
+            border: 3px solid var(--hk-hotpink);
+            box-shadow: 0 0 0 3px white, 0 8px 15px rgba(255, 105, 180, 0.4);
+        }
+        .color-card.selected::after {
+            content: '✓';
+            position: absolute;
+            top: -6px;
+            right: -6px;
+            background: var(--hk-hotpink);
+            color: white;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+            border: 2px solid white;
+        }
+
         .loader {
             border: 4px solid #FFF5F7;
             border-top: 4px solid #FF69B4;
             border-radius: 50%;
-            width: 30px;
-            height: 30px;
+            width: 24px;
+            height: 24px;
             animation: spin 1s linear infinite;
         }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
-        /* Viewer Styles */
+        /* Fullscreen viewer */
         .pan-zoom-container {
             width: 100%;
             height: 100%;
@@ -109,146 +133,156 @@
 
     <div class="app-container pb-28">
         
-        <header class="sticky top-0 z-40 bg-white/80 backdrop-blur-lg pt-safe px-4 py-3 flex items-center justify-between shadow-sm border-b border-pink-100/50">
-            <div class="w-20"></div>
+        <header class="sticky top-0 z-40 bg-white/85 backdrop-blur-md pt-safe px-4 py-3 flex items-center justify-between shadow-sm border-b border-pink-100/50">
+            <div class="w-20 text-xs font-bold text-pink-400 flex items-center gap-1">
+                <div id="sync-status" class="w-2 h-2 rounded-full bg-gray-300"></div>
+                <span id="sync-text">连接中...</span>
+            </div>
             <h1 class="text-lg font-extrabold text-pink-500 flex items-center justify-center gap-1 tracking-wide">
-                🐱 芋泥拼豆小铺 🍼
+                🐱 芋泥拼豆小铺 🎀
             </h1>
-            <div class="wechat-capsule rounded-full flex items-center px-3 py-1.5 gap-2 w-20 justify-center">
-                <i class="ph-bold ph-dots-three text-gray-700"></i>
-                <div class="w-[1px] h-4 bg-gray-300"></div>
-                <i class="ph-bold ph-record text-gray-700"></i>
+            <div class="w-20 flex justify-end">
+                <div class="border border-black/10 bg-white/80 backdrop-blur-md rounded-full flex items-center px-3 py-1 gap-2 shadow-sm">
+                    <i class="ph-bold ph-dots-three text-gray-700"></i>
+                    <div class="w-[1px] h-3 bg-gray-300"></div>
+                    <i class="ph-bold ph-record text-gray-700"></i>
+                </div>
             </div>
         </header>
 
-        <main class="p-5">
+        <main class="p-4">
             <section id="tab-maker" class="block animate-fade-in">
-                
-                <div class="card-pink mt-4">
+                <div class="card-pink mt-2">
                     <div class="sticker sticker-tr">🍩</div>
-                    <h2 class="text-xl font-extrabold text-gray-800 mb-5 flex items-center gap-2">
-                        <span class="bg-pink-100 p-2 rounded-full text-pink-500"><i class="ph-fill ph-magic-wand"></i></span>
-                        定制编号图纸
+                    <h2 class="text-lg font-extrabold text-gray-800 mb-4 flex items-center gap-2">
+                        <span class="bg-pink-100 p-1.5 rounded-full text-pink-500"><i class="ph-fill ph-magic-wand"></i></span>
+                        定制拼豆图纸
                     </h2>
                     
-                    <div class="mb-5">
-                        <label class="block text-sm font-bold text-pink-400 mb-2 pl-1">1. 上传想要制作的图片</label>
-                        <div class="relative w-full h-16 rounded-[24px] bg-pink-50/50 flex items-center px-4 overflow-hidden border-2 border-dashed border-pink-200 hover:bg-pink-50 transition-colors">
-                            <div class="bg-white p-1.5 rounded-xl shadow-sm mr-3"><i class="ph-fill ph-image text-pink-400 text-xl"></i></div>
-                            <span id="fileName" class="text-pink-300 text-sm font-bold truncate flex-1">点击选择本地相册图片...</span>
+                    <div class="mb-4">
+                        <label class="block text-sm font-bold text-pink-400 mb-1.5 pl-1">1. 上传想要制作的图片</label>
+                        <div class="relative w-full h-14 rounded-2xl bg-pink-50/50 flex items-center px-4 overflow-hidden border-2 border-dashed border-pink-200 hover:bg-pink-50 transition-colors">
+                            <div class="bg-white p-1 rounded-lg shadow-sm mr-3"><i class="ph-fill ph-image text-pink-400 text-lg"></i></div>
+                            <span id="fileName" class="text-pink-300 text-sm font-bold truncate flex-1">点击选择本地图片...</span>
                             <input type="file" id="imageInput" accept="image/*" class="absolute inset-0 opacity-0 w-full h-full cursor-pointer" onchange="updateFileName()">
                         </div>
                     </div>
 
-                    <div class="mb-6">
-                        <label class="block text-sm font-bold text-pink-400 mb-2 pl-1">2. 选择拼豆板规格</label>
-                        <div class="relative flex items-center bg-pink-50/50 rounded-[24px] overflow-hidden border-2 border-pink-100">
-                            <div class="absolute left-3 bg-white p-1.5 rounded-xl shadow-sm"><i class="ph-fill ph-squares-four text-purple-400 text-xl"></i></div>
-                            <select id="gridSize" class="w-full bg-transparent py-4 pl-14 pr-10 text-gray-700 font-extrabold appearance-none focus:outline-none">
-                                <option value="52">52 × 52 格 (小巧精致)</option>
-                                <option value="78">78 × 78 格 (常规尺寸)</option>
-                                <option value="104">104 × 104 格 (高清大幅)</option>
-                                <option value="120">120 × 120 格 (巨幅典藏)</option>
+                    <div class="mb-5">
+                        <label class="block text-sm font-bold text-pink-400 mb-1.5 pl-1">2. 选择拼豆板规格</label>
+                        <div class="relative flex items-center bg-pink-50/50 rounded-2xl overflow-hidden border-2 border-pink-100">
+                            <div class="absolute left-3 bg-white p-1 rounded-lg shadow-sm"><i class="ph-fill ph-squares-four text-purple-400 text-lg"></i></div>
+                            <select id="gridSize" class="w-full bg-transparent py-3 pl-12 pr-8 text-gray-700 font-extrabold appearance-none focus:outline-none">
+                                <option value="52">52 × 52 格 (小巧)</option>
+                                <option value="78">78 × 78 格 (常规)</option>
+                                <option value="104">104 × 104 格 (大幅)</option>
+                                <option value="120">120 × 120 格 (巨幅)</option>
                             </select>
-                            <i class="ph-bold ph-caret-down text-pink-300 absolute right-4 pointer-events-none"></i>
+                            <i class="ph-bold ph-caret-down text-pink-300 absolute right-3 pointer-events-none"></i>
                         </div>
                     </div>
 
-                    <button id="generateBtn" onclick="processImage()" class="w-full bg-[#FFB6C1] hover:bg-[#FF69B4] text-white font-black py-4 rounded-[24px] shadow-[0_4px_15px_rgba(255,182,193,0.5)] active:scale-[0.98] transition-all text-lg flex justify-center items-center gap-2">
-                        <span>生成高清编号图纸 ✨</span>
+                    <button id="generateBtn" onclick="processImage()" class="w-full bg-[#FFB6C1] hover:bg-[#FF69B4] text-white font-black py-3.5 rounded-2xl shadow-[0_4px_15px_rgba(255,182,193,0.5)] active:scale-[0.98] transition-all flex justify-center items-center gap-2">
+                        <span>生成高清图纸 ✨</span>
                     </button>
                 </div>
 
-                <div id="resultCard" class="hidden card-pink mt-8">
+                <!-- Pattern Result Card -->
+                <div id="resultCard" class="hidden card-pink mt-6">
                     <div class="sticker sticker-tl">🧁</div>
-                    <h2 class="text-xl font-extrabold text-gray-800 mb-4 flex items-center gap-2 border-b-2 border-pink-50 pb-4">
-                        <span class="bg-purple-100 p-2 rounded-full text-purple-500"><i class="ph-fill ph-palette"></i></span>
+                    <h2 class="text-lg font-extrabold text-gray-800 mb-3 flex items-center gap-2 border-b-2 border-pink-50 pb-3">
+                        <span class="bg-purple-100 p-1.5 rounded-full text-purple-500"><i class="ph-fill ph-palette"></i></span>
                         图纸与消耗清单
                     </h2>
                     
-                    <div class="mb-2 text-center text-xs font-bold text-pink-400">点击图纸可放大查看编号与网格 👇</div>
+                    <div class="mb-2 text-center text-xs font-bold text-pink-400">点击图纸可全屏放大查看编号 👇</div>
                     
-                    <div onclick="openViewer()" class="w-full bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] bg-gray-100 rounded-3xl p-3 mb-5 flex justify-center border-4 border-pink-100 shadow-inner overflow-hidden relative cursor-pointer group">
-                        <!-- Preview Image (scaled down) -->
-                        <img id="previewImage" class="w-full max-w-[320px] h-auto shadow-md rounded-lg" alt="拼豆图纸预览">
-                        
-                        <!-- Overlay -->
-                        <div class="absolute inset-0 bg-black/20 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                            <div class="bg-white/90 text-pink-500 px-4 py-2 rounded-full font-black shadow-lg flex items-center gap-1">
+                    <div onclick="openViewer()" class="w-full bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] bg-gray-100 rounded-2xl p-2 mb-4 flex justify-center border-4 border-pink-100 shadow-inner overflow-hidden relative cursor-pointer group">
+                        <img id="previewImage" class="w-full max-w-[280px] h-auto shadow-md rounded-md" alt="拼豆图纸预览">
+                        <div class="absolute inset-0 bg-black/10 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                            <div class="bg-white/90 text-pink-500 px-4 py-1.5 rounded-full font-black shadow-lg flex items-center gap-1 text-sm">
                                 <i class="ph-bold ph-magnifying-glass-plus"></i> 点击放大
                             </div>
                         </div>
                     </div>
                     
-                    <!-- 隐藏的高清画板，仅用于绘制 -->
                     <canvas id="hiddenCanvas" class="hidden"></canvas>
 
-                    <h3 class="text-sm font-black text-pink-500 mb-3 bg-pink-50 inline-flex items-center gap-1 px-4 py-1.5 rounded-full border border-pink-100">
-                        <i class="ph-fill ph-beanie"></i> 耗材汇总卡：
+                    <h3 class="text-sm font-black text-pink-500 mb-3 bg-pink-50 inline-flex items-center gap-1 px-3 py-1 rounded-full border border-pink-100">
+                        <i class="ph-fill ph-beanie"></i> 耗材汇总：
                     </h3>
                     
-                    <!-- NEW: Palette UI -->
-                    <div id="patternColorsList" class="flex flex-wrap gap-2.5 justify-center mb-6 max-h-[35vh] overflow-y-auto pb-4 px-1">
-                        <!-- Items injected by JS -->
+                    <div id="patternColorsList" class="grid grid-cols-4 sm:grid-cols-5 gap-2 justify-center mb-5 max-h-[30vh] overflow-y-auto custom-scrollbar p-1">
+                        <!-- Injected by JS -->
                     </div>
 
-                    <button onclick="deductFromInventory()" class="w-full bg-white text-pink-500 hover:bg-pink-50 font-black py-4 rounded-[24px] shadow-sm active:scale-[0.98] transition-transform border-2 border-[#FFB6C1] flex justify-center items-center gap-2 text-lg">
-                        <i class="ph-bold ph-check-fat"></i> 作品完成 (一键扣除库存)
+                    <button onclick="deductFromInventory()" class="w-full bg-white text-pink-500 hover:bg-pink-50 font-black py-3.5 rounded-2xl shadow-sm active:scale-[0.98] transition-transform border-2 border-[#FFB6C1] flex justify-center items-center gap-2">
+                        <i class="ph-bold ph-check-fat"></i> 作品完成 (一键扣除云端库存)
                     </button>
                 </div>
             </section>
 
-            <!-- Inventory Tab (Unchanged functionality) -->
-            <section id="tab-inventory" class="hidden animate-fade-in mt-4">
+            <section id="tab-inventory" class="hidden animate-fade-in mt-2">
                 <div class="card-pink">
-                    <div class="sticker sticker-tr">🍰</div>
-                    <h2 class="text-xl font-extrabold text-gray-800 mb-5 flex items-center gap-2">
-                        <span class="bg-pink-100 p-2 rounded-full text-pink-500"><i class="ph-fill ph-storefront"></i></span>
-                        补充豆豆库存
+                    <div class="sticker sticker-tr">🍓</div>
+                    <h2 class="text-lg font-extrabold text-gray-800 mb-4 flex items-center gap-2">
+                        <span class="bg-pink-100 p-1.5 rounded-full text-pink-500"><i class="ph-fill ph-storefront"></i></span>
+                        云端仓库补货
                     </h2>
-                    <div class="mb-5">
-                        <label class="block text-sm font-bold text-pink-400 mb-2 pl-1">1. 点击选择 MARD 色号</label>
-                        <div id="colorPickerGrid" class="grid grid-cols-6 gap-2.5 max-h-[220px] overflow-y-auto p-3 bg-pink-50/50 rounded-[24px] border-2 border-pink-100"></div>
-                        <input type="hidden" id="selectedMardId" value="">
-                    </div>
-                    <div class="mb-6">
-                        <label class="block text-sm font-bold text-pink-400 mb-2 pl-1">2. 本次买入数量 (颗)</label>
-                        <div class="relative flex items-center bg-pink-50/50 rounded-[24px] overflow-hidden border-2 border-pink-100">
-                            <div class="absolute left-3 bg-white p-1.5 rounded-xl shadow-sm"><i class="ph-fill ph-plus-circle text-purple-400 text-xl"></i></div>
-                            <input type="number" id="newColorCount" placeholder="输入豆豆数量喵~" class="w-full h-14 bg-transparent pl-14 pr-4 text-gray-700 font-extrabold focus:outline-none placeholder-pink-300">
+                    
+                    <div class="mb-4">
+                        <div class="flex justify-between items-center mb-1.5">
+                            <label class="block text-sm font-bold text-pink-400 pl-1">1. 点击多选买到的色号</label>
+                            <span class="text-xs font-bold text-white bg-pink-400 px-2 py-0.5 rounded-full">已选 <span id="selCount">0</span> 色</span>
+                        </div>
+                        <div id="mardColorGrid" class="grid grid-cols-6 sm:grid-cols-8 gap-1.5 max-h-[30vh] overflow-y-auto p-2 bg-pink-50/50 rounded-2xl border-2 border-pink-100 custom-scrollbar">
+                            <!-- Populated by JS -->
                         </div>
                     </div>
-                    <button onclick="addToInventory()" class="w-full bg-gradient-to-r from-[#B39DDB] to-[#FFB6C1] text-white font-black py-4 rounded-[24px] shadow-[0_4px_15px_rgba(179,157,219,0.4)] active:scale-[0.98] transition-transform text-lg flex justify-center items-center gap-2">
-                        <i class="ph-bold ph-package"></i> 存入小仓库
+
+                    <div class="mb-5">
+                        <label class="block text-sm font-bold text-pink-400 mb-1.5 pl-1">2. 统一入库数量 (颗)</label>
+                        <div class="relative flex items-center bg-pink-50/50 rounded-2xl overflow-hidden border-2 border-pink-100">
+                            <div class="absolute left-3 bg-white p-1 rounded-lg shadow-sm"><i class="ph-fill ph-plus-circle text-purple-400 text-lg"></i></div>
+                            <input type="number" id="batchCount" placeholder="例如: 1000" class="w-full h-12 bg-transparent pl-12 pr-4 text-gray-700 font-extrabold focus:outline-none placeholder-pink-300">
+                        </div>
+                    </div>
+                    
+                    <button onclick="addSelectedToInventory()" class="w-full bg-gradient-to-r from-[#B39DDB] to-[#FFB6C1] text-white font-black py-3.5 rounded-2xl shadow-[0_4px_15px_rgba(179,157,219,0.4)] active:scale-[0.98] transition-transform flex justify-center items-center gap-2">
+                        <i class="ph-bold ph-package"></i> 一键存入选中颜色
                     </button>
                 </div>
+
                 <div class="card-pink mt-6">
                     <div class="sticker sticker-tl">🥛</div>
-                    <div class="flex justify-between items-center mb-5 border-b-2 border-pink-50 pb-4">
-                        <h2 class="text-xl font-extrabold text-gray-800 flex items-center gap-2">
-                            <span class="bg-purple-100 p-2 rounded-full text-purple-500"><i class="ph-fill ph-treasure-chest"></i></span>
-                            我的小金库
+                    <div class="flex justify-between items-center mb-4 border-b-2 border-pink-50 pb-3">
+                        <h2 class="text-lg font-extrabold text-gray-800 flex items-center gap-2">
+                            <span class="bg-purple-100 p-1.5 rounded-full text-purple-500"><i class="ph-fill ph-treasure-chest"></i></span>
+                            我的云端金库
                         </h2>
-                        <span id="totalColorsCount" class="text-xs font-bold text-[#B39DDB] bg-[#F3E5F5] px-3 py-1.5 rounded-full border border-[#E1BEE7]">共 0 色</span>
+                        <span id="totalColorsCount" class="text-xs font-bold text-[#B39DDB] bg-[#F3E5F5] px-2 py-1 rounded-full border border-[#E1BEE7]">共 0 色</span>
                     </div>
-                    <ul id="inventoryList" class="space-y-3 max-h-[50vh] overflow-y-auto pr-2 custom-scrollbar"></ul>
+                    <p class="text-[10px] text-center text-pink-300 font-bold mb-3">提示：点击卡片可修改数量，设为 0 即删除</p>
+                    <div id="inventoryGrid" class="grid grid-cols-4 sm:grid-cols-5 gap-2 max-h-[40vh] overflow-y-auto custom-scrollbar p-1">
+                        <!-- Populated by JS -->
+                    </div>
                 </div>
             </section>
         </main>
 
-        <nav class="fixed bottom-0 w-full max-w-[480px] bg-white/95 backdrop-blur-md rounded-t-[32px] shadow-[0_-4px_25px_rgba(255,182,193,0.2)] pb-safe pt-2 px-8 flex justify-around z-40 border-t border-pink-50">
-            <button onclick="switchTab('maker')" id="nav-maker" class="nav-btn active flex flex-col items-center p-3 text-pink-500 transition-colors">
+        <nav class="fixed bottom-0 w-full max-w-[500px] bg-white/95 backdrop-blur-md rounded-t-3xl shadow-[0_-4px_25px_rgba(255,182,193,0.2)] pb-safe pt-2 px-8 flex justify-around z-40 border-t border-pink-50">
+            <button onclick="switchTab('maker')" id="nav-maker" class="nav-btn active flex flex-col items-center p-2.5 text-pink-500 transition-colors">
                 <i class="ph-fill ph-sparkle text-2xl mb-1"></i>
-                <span class="text-[12px] font-black">图纸制作</span>
+                <span class="text-[11px] font-black">图纸制作</span>
             </button>
-            <button onclick="switchTab('inventory')" id="nav-inventory" class="nav-btn flex flex-col items-center p-3 text-pink-200 transition-colors hover:text-pink-400">
+            <button onclick="switchTab('inventory')" id="nav-inventory" class="nav-btn flex flex-col items-center p-2.5 text-pink-200 transition-colors hover:text-pink-400">
                 <i class="ph-fill ph-backpack text-2xl mb-1"></i>
-                <span class="text-[12px] font-black">我的库存</span>
+                <span class="text-[11px] font-black">仓库协作</span>
             </button>
         </nav>
     </div>
 
-    <!-- Fullscreen Image Viewer Modal -->
+    <!-- Fullscreen Viewer Modal -->
     <div id="imageViewer" class="fixed inset-0 bg-gray-900/95 backdrop-blur-md z-50 hidden flex-col transition-opacity duration-300 opacity-0">
         <div class="p-safe pt-4 px-4 pb-2 flex justify-between items-center text-white bg-black/30 shadow-sm border-b border-white/10 shrink-0">
             <div class="flex items-center gap-2 font-bold text-sm text-pink-200">
@@ -258,173 +292,348 @@
                 <i class="ph-bold ph-x text-lg"></i>
             </button>
         </div>
-        <!-- 借助浏览器的原生 scroll 和图片双指缩放 -->
         <div class="pan-zoom-container bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] bg-gray-800">
             <img id="viewerImage" src="" class="max-w-none shadow-2xl bg-white" alt="高清图纸">
         </div>
     </div>
 
     <!-- Custom Dialog Modal -->
-    <div id="customModal" class="fixed inset-0 bg-black/20 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4 opacity-0 transition-opacity duration-300">
-        <div class="bg-white rounded-[32px] w-full max-w-xs p-6 shadow-2xl transform scale-95 transition-transform duration-300 border-4 border-white relative text-center" id="modalContent">
-            <div class="absolute -top-10 left-1/2 transform -translate-x-1/2 sticker" id="modalSticker">🍓</div>
-            <div class="mt-8 mb-4 inline-flex items-center justify-center w-16 h-16 rounded-full bg-pink-50 border-4 border-white shadow-sm" id="modalIcon">
-                <i class="ph-fill ph-cat text-3xl text-pink-400"></i>
+    <div id="customModal" class="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4 opacity-0 transition-opacity duration-300">
+        <div class="bg-white rounded-3xl w-full max-w-xs p-6 shadow-2xl transform scale-95 transition-transform duration-300 border-4 border-white relative text-center" id="modalContent">
+            <div class="absolute -top-8 left-1/2 transform -translate-x-1/2 sticker" id="modalSticker" style="width:50px; height:50px; font-size:1.5rem;">🍓</div>
+            <div class="mt-6 mb-3 inline-flex items-center justify-center w-14 h-14 rounded-full bg-pink-50 border-4 border-white shadow-sm" id="modalIcon">
+                <i class="ph-fill ph-cat text-2xl text-pink-400"></i>
             </div>
-            <h3 class="text-xl font-black text-gray-800 mb-2" id="modalTitle">提示</h3>
-            <p class="text-gray-500 font-bold text-sm mb-6 leading-relaxed" id="modalMessage">消息</p>
-            <div class="flex gap-3" id="modalActions"></div>
+            <h3 class="text-lg font-black text-gray-800 mb-2" id="modalTitle">提示</h3>
+            <p class="text-gray-500 font-bold text-sm mb-5 leading-relaxed" id="modalMessage">消息</p>
+            <div id="modalInputContainer" class="hidden mb-5">
+                <input type="number" id="modalInput" class="w-full bg-pink-50 border-2 border-pink-100 rounded-xl p-3 font-bold text-center text-gray-700 outline-none focus:border-pink-400">
+            </div>
+            <div class="flex gap-2" id="modalActions"></div>
         </div>
     </div>
 
-    <script>
-        // MARD 221 Colors
-        const mardColors = [
-            { id: "A1", hex: "#FFFACD" }, { id: "A4", hex: "#FFEA00" }, { id: "A6", hex: "#FF8C00" }, { id: "A9", hex: "#FF7F50" }, { id: "A14", hex: "#FF4500" }, { id: "A26", hex: "#FFD700" },
-            { id: "B1", hex: "#E0FFB3" }, { id: "B5", hex: "#32CD32" }, { id: "B8", hex: "#008000" }, { id: "B12", hex: "#004d00" }, { id: "B25", hex: "#2E8B57" }, { id: "B29", hex: "#9ACD32" },
-            { id: "C1", hex: "#E0FFFF" }, { id: "C5", hex: "#00BFFF" }, { id: "C8", hex: "#0000FF" }, { id: "C12", hex: "#191970" }, { id: "C16", hex: "#000080" }, { id: "C26", hex: "#008B8B" },
-            { id: "D1", hex: "#E6E6FA" }, { id: "D5", hex: "#BA55D3" }, { id: "D7", hex: "#8A2BE2" }, { id: "D10", hex: "#4B0082" }, { id: "D13", hex: "#C71585" }, { id: "D22", hex: "#2e004f" },
-            { id: "E1", hex: "#FFE4E1" }, { id: "E4", hex: "#FF69B4" }, { id: "E6", hex: "#FF1493" }, { id: "E10", hex: "#C71585" }, { id: "E13", hex: "#8B0045" }, { id: "E24", hex: "#D8BFD8" },
-            { id: "F2", hex: "#FF6347" }, { id: "F5", hex: "#FF0000" }, { id: "F8", hex: "#B22222" }, { id: "F11", hex: "#8B0000" }, { id: "F25", hex: "#CD5C5C" },
-            { id: "G1", hex: "#FFEBCD" }, { id: "G5", hex: "#F4A460" }, { id: "G8", hex: "#8B4513" }, { id: "G14", hex: "#5C4033" }, { id: "G21", hex: "#A0522D" },
-            { id: "H1", hex: "#FFFFFF" }, { id: "H4", hex: "#D3D3D3" }, { id: "H6", hex: "#808080" }, { id: "H7", hex: "#000000" }, { id: "H16", hex: "#2F4F4F" }, { id: "H20", hex: "#778899" },
-            { id: "M1", hex: "#F5F5DC" }, { id: "M8", hex: "#800000" }, { id: "M15", hex: "#556B2F" }
-        ];
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-        function hexToRgb(hex) {
-            const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
-            return result ? { r: parseInt(result[1], 16), g: parseInt(result[2], 16), b: parseInt(result[3], 16) } : null;
+        // Generate 221 MARD Colors deterministically
+        const mardColors = {};
+        const seriesData = {
+            'A': { count: 26, r: 255, g: 215, b: 0, step: -5 }, // Yellow/Orange
+            'B': { count: 32, r: 50, g: 205, b: 50, step: -3 }, // Green
+            'C': { count: 29, r: 0, g: 191, b: 255, step: -4 }, // Cyan/Blue
+            'D': { count: 26, r: 138, g: 43, b: 226, step: -3 }, // Purple
+            'E': { count: 24, r: 255, g: 105, b: 180, step: -4 }, // Pink
+            'F': { count: 25, r: 255, g: 69, b: 0, step: -6 },   // Red
+            'G': { count: 21, r: 210, g: 105, b: 30, step: -4 }, // Brown/Skin
+            'H': { count: 23, r: 240, g: 240, b: 240, step: -10 },// Grayscale
+            'M': { count: 15, r: 107, g: 142, b: 35, step: -4 }  // Earth
+        };
+
+        for (const [prefix, config] of Object.entries(seriesData)) {
+            for (let i = 1; i <= config.count; i++) {
+                let r = Math.max(0, Math.min(255, config.r + (i * config.step)));
+                let g = Math.max(0, Math.min(255, config.g + (i * config.step)));
+                let b = Math.max(0, Math.min(255, config.b + (i * config.step)));
+                
+                // Special fixes for pure white/black
+                if (prefix === 'H' && i === 1) { r=255; g=255; b=255; }
+                if (prefix === 'H' && i === 23) { r=0; g=0; b=0; }
+
+                const hex = "#" + (1 << 24 | r << 16 | g << 8 | b).toString(16).slice(1).toUpperCase();
+                
+                // Contrast text calculation
+                const yiq = ((r*299)+(g*587)+(b*114))/1000;
+                const textColor = (yiq >= 128) ? '#000000' : '#FFFFFF';
+                
+                mardColors[`${prefix}${i}`] = { hex, textColor };
+            }
         }
 
-        // Calculate text color (black or white) based on background brightness
-        function getContrastYIQ(hexcolor){
-            const r = parseInt(hexcolor.substring(1,3), 16);
-            const g = parseInt(hexcolor.substring(3,5), 16);
-            const b = parseInt(hexcolor.substring(5,7), 16);
-            const yiq = ((r*299)+(g*587)+(b*114))/1000;
-            return (yiq >= 128) ? '#000000' : '#FFFFFF';
-        }
-
-        mardColors.forEach(c => {
-            const rgb = hexToRgb(c.hex);
-            c.r = rgb.r; c.g = rgb.g; c.b = rgb.b;
-            c.textColor = getContrastYIQ(c.hex);
-        });
-
-        let inventory = JSON.parse(localStorage.getItem('yuniPerlerInventory')) || {};
+        // Global State
+        let inventory = {};
         let currentPatternColors = {};
+        let selectedColorsForBatch = new Set();
+        let db, auth, user;
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-yuni-app';
 
-        function switchTab(tabId) {
+        // Firebase Initialization
+        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {};
+        if (Object.keys(firebaseConfig).length > 0) {
+            const app = initializeApp(firebaseConfig);
+            db = getFirestore(app);
+            auth = getAuth(app);
+            initAuth();
+        } else {
+            document.getElementById('sync-text').textContent = '本地模式';
+            document.getElementById('sync-status').classList.replace('bg-gray-300', 'bg-yellow-400');
+            loadLocalInventory();
+            renderInventoryGrid();
+            renderColorGrid();
+        }
+
+        async function initAuth() {
+            try {
+                if (typeof __initial_auth_token !== 'undefined') {
+                    await signInWithCustomToken(auth, __initial_auth_token);
+                } else {
+                    await signInAnonymously(auth);
+                }
+                user = auth.currentUser;
+                setupRealtimeSync();
+            } catch (error) {
+                console.error("Auth error", error);
+                document.getElementById('sync-text').textContent = '同步失败';
+                document.getElementById('sync-status').classList.replace('bg-gray-300', 'bg-red-500');
+            }
+        }
+
+        function setupRealtimeSync() {
+            if (!user) return;
+            const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'inventory', 'shared');
+            
+            onSnapshot(docRef, (docSnap) => {
+                if (docSnap.exists()) {
+                    inventory = docSnap.data();
+                } else {
+                    inventory = {};
+                }
+                renderInventoryGrid();
+                renderColorGrid(); // Refresh selections/counts context if needed
+                document.getElementById('sync-text').textContent = '已云同步';
+                document.getElementById('sync-status').classList.replace('bg-gray-300', 'bg-green-400');
+            }, (error) => {
+                console.error("Sync error", error);
+                document.getElementById('sync-text').textContent = '同步断开';
+                document.getElementById('sync-status').classList.replace('bg-green-400', 'bg-red-500');
+            });
+        }
+
+        async function saveInventoryToCloud() {
+            if (db && user) {
+                try {
+                    const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'inventory', 'shared');
+                    await setDoc(docRef, inventory);
+                } catch (e) {
+                    console.error("Save to cloud failed", e);
+                    showModal('同步失败', '无法保存到云端，请检查网络 🥲', 'error');
+                }
+            } else {
+                localStorage.setItem('yuniPerlerInventory', JSON.stringify(inventory));
+            }
+        }
+
+        function loadLocalInventory() {
+            inventory = JSON.parse(localStorage.getItem('yuniPerlerInventory')) || {};
+        }
+
+        // Expose functions to window for HTML onclick attributes
+        window.switchTab = function(tabId) {
             document.getElementById('tab-maker').classList.add('hidden');
             document.getElementById('tab-inventory').classList.add('hidden');
             document.getElementById(`tab-${tabId}`).classList.remove('hidden');
 
             const makerBtn = document.getElementById('nav-maker');
             const invBtn = document.getElementById('nav-inventory');
-            
-            makerBtn.classList.remove('text-pink-500'); makerBtn.classList.add('text-pink-200');
-            invBtn.classList.remove('text-pink-500'); invBtn.classList.add('text-pink-200');
+            makerBtn.className = "nav-btn flex flex-col items-center p-2.5 transition-colors " + (tabId==='maker' ? "text-pink-500 active" : "text-pink-200 hover:text-pink-400");
+            invBtn.className = "nav-btn flex flex-col items-center p-2.5 transition-colors " + (tabId==='inventory' ? "text-pink-500 active" : "text-pink-200 hover:text-pink-400");
+        };
 
-            document.getElementById(`nav-${tabId}`).classList.remove('text-pink-200');
-            document.getElementById(`nav-${tabId}`).classList.add('text-pink-500');
-
-            if (tabId === 'inventory') {
-                renderInventory();
-                if(document.getElementById('colorPickerGrid').children.length === 0) renderColorPicker();
-            }
-        }
-
-        function updateFileName() {
+        window.updateFileName = function() {
             const input = document.getElementById('imageInput');
             const nameDisplay = document.getElementById('fileName');
             if (input.files && input.files.length > 0) {
                 nameDisplay.textContent = input.files[0].name;
-                nameDisplay.classList.add('text-pink-600');
-                nameDisplay.classList.remove('text-pink-300');
+                nameDisplay.classList.replace('text-pink-300', 'text-pink-600');
             }
-        }
+        };
 
-        // Image Viewer Logic
-        function openViewer() {
+        window.openViewer = function() {
             const viewer = document.getElementById('imageViewer');
             viewer.classList.remove('hidden');
             viewer.style.display = 'flex';
             setTimeout(() => viewer.classList.remove('opacity-0'), 10);
-            document.body.style.overflow = 'hidden'; // prevent background scrolling
-        }
+        };
 
-        function closeViewer() {
+        window.closeViewer = function() {
             const viewer = document.getElementById('imageViewer');
             viewer.classList.add('opacity-0');
             setTimeout(() => {
                 viewer.classList.add('hidden');
                 viewer.style.display = 'none';
-                document.body.style.overflow = '';
             }, 300);
-        }
+        };
 
-        // Modal Logic
-        function showModal(title, message, type = 'info', confirmCallback = null) {
+        // UI Modals
+        window.showModal = function(title, message, type = 'info', confirmCallback = null, withInput = false, initialInputValue = '') {
             const modal = document.getElementById('customModal');
-            const modalContent = document.getElementById('modalContent');
             document.getElementById('modalTitle').textContent = title;
             document.getElementById('modalMessage').innerHTML = message.replace(/\n/g, '<br>');
+            
             const iconEl = document.getElementById('modalIcon');
             const actionsEl = document.getElementById('modalActions');
             const stickerEl = document.getElementById('modalSticker');
+            const inputContainer = document.getElementById('modalInputContainer');
+            const inputEl = document.getElementById('modalInput');
 
-            let iconHtml = '<i class="ph-fill ph-cat text-3xl"></i>';
-            stickerEl.textContent = '🎀';
-
+            stickerEl.textContent = type === 'warning' || type === 'error' ? '🍩' : (type === 'success' ? '🍰' : '🎀');
+            
             if (type === 'warning' || type === 'error') {
-                iconEl.className = 'mt-8 mb-4 inline-flex items-center justify-center w-16 h-16 rounded-full bg-red-100 border-4 border-white shadow-sm text-red-500';
-                iconHtml = '<i class="ph-fill ph-warning-circle text-3xl"></i>';
-                stickerEl.textContent = '🍩';
+                iconEl.className = 'mt-6 mb-3 inline-flex items-center justify-center w-14 h-14 rounded-full bg-red-100 border-4 border-white shadow-sm text-red-500';
+                iconEl.innerHTML = '<i class="ph-fill ph-warning-circle text-2xl"></i>';
             } else if (type === 'success') {
-                iconEl.className = 'mt-8 mb-4 inline-flex items-center justify-center w-16 h-16 rounded-full bg-green-100 border-4 border-white shadow-sm text-green-500';
-                iconHtml = '<i class="ph-fill ph-check-circle text-3xl"></i>';
-                stickerEl.textContent = '🍰';
+                iconEl.className = 'mt-6 mb-3 inline-flex items-center justify-center w-14 h-14 rounded-full bg-green-100 border-4 border-white shadow-sm text-green-500';
+                iconEl.innerHTML = '<i class="ph-fill ph-check-circle text-2xl"></i>';
             } else {
-                iconEl.className = 'mt-8 mb-4 inline-flex items-center justify-center w-16 h-16 rounded-full bg-pink-100 border-4 border-white shadow-sm text-pink-500';
+                iconEl.className = 'mt-6 mb-3 inline-flex items-center justify-center w-14 h-14 rounded-full bg-pink-100 border-4 border-white shadow-sm text-pink-500';
+                iconEl.innerHTML = '<i class="ph-fill ph-cat text-2xl"></i>';
             }
-            iconEl.innerHTML = iconHtml;
+
+            if (withInput) {
+                inputContainer.classList.remove('hidden');
+                inputEl.value = initialInputValue;
+            } else {
+                inputContainer.classList.add('hidden');
+            }
 
             if (confirmCallback) {
-                actionsEl.innerHTML = `<button onclick="closeModal()" class="flex-1 bg-gray-100 text-gray-500 font-black py-4 rounded-[20px] active:scale-[0.98] transition-all">取消</button>
-                                       <button id="modalConfirmBtn" class="flex-[2] bg-[#FFB6C1] text-white font-black py-4 rounded-[20px] active:scale-[0.98] transition-all shadow-md">确定喵！</button>`;
-                document.getElementById('modalConfirmBtn').onclick = () => { confirmCallback(); closeModal(); };
+                actionsEl.innerHTML = `
+                    <button onclick="closeModal()" class="flex-1 bg-gray-100 text-gray-500 font-black py-3 rounded-xl active:scale-[0.98] transition-all">取消</button>
+                    <button id="modalConfirmBtn" class="flex-[2] bg-[#FFB6C1] text-white font-black py-3 rounded-xl active:scale-[0.98] transition-all shadow-md">确定</button>`;
+                document.getElementById('modalConfirmBtn').onclick = () => { 
+                    const val = withInput ? parseInt(inputEl.value) : null;
+                    confirmCallback(val); 
+                    closeModal(); 
+                };
             } else {
-                actionsEl.innerHTML = `<button onclick="closeModal()" class="w-full bg-[#FFB6C1] text-white font-black py-4 rounded-[20px] active:scale-[0.98] transition-all shadow-md">好哒！</button>`;
+                actionsEl.innerHTML = `<button onclick="closeModal()" class="w-full bg-[#FFB6C1] text-white font-black py-3 rounded-xl active:scale-[0.98] transition-all shadow-md">好哒！</button>`;
             }
 
             modal.classList.remove('hidden');
             void modal.offsetWidth; 
             modal.classList.remove('opacity-0');
-            modalContent.classList.remove('scale-95');
-        }
+            document.getElementById('modalContent').classList.remove('scale-95');
+        };
 
-        function closeModal() {
+        window.closeModal = function() {
             const modal = document.getElementById('customModal');
-            const modalContent = document.getElementById('modalContent');
             modal.classList.add('opacity-0');
-            modalContent.classList.add('scale-95');
+            document.getElementById('modalContent').classList.add('scale-95');
             setTimeout(() => modal.classList.add('hidden'), 300);
+        };
+
+        // Inventory Grid Render
+        function renderColorGrid() {
+            const grid = document.getElementById('mardColorGrid');
+            if(grid.children.length > 0 && selectedColorsForBatch.size === 0) return; // Prevent full re-render if empty selection
+            
+            grid.innerHTML = '';
+            // Render all 221 colors
+            Object.keys(mardColors).forEach(id => {
+                const c = mardColors[id];
+                const div = document.createElement('div');
+                const isSelected = selectedColorsForBatch.has(id);
+                div.className = `color-card ${isSelected ? 'selected' : ''}`;
+                div.style.backgroundColor = c.hex;
+                div.style.color = c.textColor;
+                div.innerText = id;
+                
+                div.onclick = () => {
+                    if (selectedColorsForBatch.has(id)) {
+                        selectedColorsForBatch.delete(id);
+                        div.classList.remove('selected');
+                    } else {
+                        selectedColorsForBatch.add(id);
+                        div.classList.add('selected');
+                    }
+                    document.getElementById('selCount').textContent = selectedColorsForBatch.size;
+                };
+                grid.appendChild(div);
+            });
         }
 
-        function findNearestMARDColor(r, g, b) {
-            let minDistance = Infinity;
-            let nearestColor = mardColors[0];
-            for (let c of mardColors) {
-                const distance = Math.pow(r - c.r, 2) + Math.pow(g - c.g, 2) + Math.pow(b - c.b, 2);
-                if (distance < minDistance) {
-                    minDistance = distance; nearestColor = c;
-                }
+        window.addSelectedToInventory = async function() {
+            if (selectedColorsForBatch.size === 0) {
+                showModal('忘记选颜色啦', '请在上方色卡矩阵中点击选中想要补货的豆豆哦喵~', 'warning');
+                return;
             }
-            return nearestColor;
+            const countInput = document.getElementById('batchCount');
+            const count = parseInt(countInput.value);
+
+            if (isNaN(count) || count <= 0) {
+                showModal('数量不对哦', '请输入正确的入库数量~', 'warning');
+                return;
+            }
+
+            selectedColorsForBatch.forEach(id => {
+                inventory[id] = (inventory[id] || 0) + count;
+            });
+
+            await saveInventoryToCloud();
+            
+            showModal('入库成功 📦', `成功为 ${selectedColorsForBatch.size} 种颜色分别存入了 ${count} 颗豆豆！云端小仓库已同步 ✨`, 'success');
+            
+            // Reset
+            selectedColorsForBatch.clear();
+            document.getElementById('selCount').textContent = '0';
+            countInput.value = '';
+            renderColorGrid(); // clear selections visually
+        };
+
+        function renderInventoryGrid() {
+            const grid = document.getElementById('inventoryGrid');
+            grid.innerHTML = '';
+            
+            const entries = Object.entries(inventory).filter(([_, count]) => count > 0);
+            document.getElementById('totalColorsCount').textContent = `共集齐 ${entries.length} 色`;
+
+            if (entries.length === 0) {
+                grid.innerHTML = `<div class="col-span-4 sm:col-span-5 text-center py-8 text-pink-300 font-bold text-sm">仓库空空如也，快去上面补货吧~</div>`;
+                return;
+            }
+
+            // Sort alphabetically (A1, A2...)
+            entries.sort((a, b) => {
+                const regex = /([A-Z])(\d+)/;
+                const matchA = a[0].match(regex);
+                const matchB = b[0].match(regex);
+                if (matchA[1] === matchB[1]) return parseInt(matchA[2]) - parseInt(matchB[2]);
+                return matchA[1].localeCompare(matchB[1]);
+            }).forEach(([id, count]) => {
+                const c = mardColors[id];
+                if (!c) return;
+                
+                const card = document.createElement('div');
+                card.className = 'flex flex-col rounded-xl overflow-hidden shadow-sm border border-black/5 bg-white cursor-pointer hover:scale-105 transition-transform';
+                card.onclick = () => editInventoryItem(id, count);
+                
+                card.innerHTML = `
+                    <div class="h-10 flex items-center justify-center font-black text-xs" style="background-color: ${c.hex}; color: ${c.textColor}">${id}</div>
+                    <div class="h-8 flex items-center justify-center font-bold text-xs text-pink-500 bg-pink-50">${count} 颗</div>
+                `;
+                grid.appendChild(card);
+            });
         }
 
-        // New Rendering Engine
-        function processImage() {
+        function editInventoryItem(id, currentCount) {
+            showModal(`修改 [${id}] 库存`, '请输入新的数量，设置为 0 即可删除该颜色。', 'info', async (newCount) => {
+                if (newCount === null || isNaN(newCount) || newCount < 0) {
+                    showModal('数量无效', '修改取消了哦~', 'warning');
+                    return;
+                }
+                if (newCount === 0) {
+                    delete inventory[id];
+                } else {
+                    inventory[id] = newCount;
+                }
+                await saveInventoryToCloud();
+            }, true, currentCount);
+        }
+
+        // Image Processing & Pattern Generation (Maintained from before)
+        window.processImage = function() {
             const fileInput = document.getElementById('imageInput');
             const gridSelect = document.getElementById('gridSize');
             const btn = document.getElementById('generateBtn');
@@ -442,83 +651,83 @@
 
                 reader.onload = function(e) {
                     img.onload = function() {
-                        // 1. 创建微缩版读取颜色像素
                         const tempCanvas = document.createElement('canvas');
                         const tempCtx = tempCanvas.getContext('2d');
-                        tempCanvas.width = size; tempCanvas.height = size; 
-                        tempCtx.drawImage(img, 0, 0, size, size);
-                        const imgData = tempCtx.getImageData(0, 0, size, size);
+                        
+                        // Calculate proportional height
+                        const ratio = img.height / img.width;
+                        const w = size;
+                        const h = Math.round(size * ratio);
+                        
+                        tempCanvas.width = w; 
+                        tempCanvas.height = h; 
+                        tempCtx.drawImage(img, 0, 0, w, h);
+                        const imgData = tempCtx.getImageData(0, 0, w, h);
                         const data = imgData.data;
                         currentPatternColors = {};
 
-                        // 2. 准备高清绘制画布 (每个拼豆格子 24x24 像素，确保字迹清晰)
                         const CELL_SIZE = 24;
                         const mainCanvas = document.getElementById('hiddenCanvas');
-                        mainCanvas.width = size * CELL_SIZE;
-                        mainCanvas.height = size * CELL_SIZE;
+                        mainCanvas.width = w * CELL_SIZE;
+                        mainCanvas.height = h * CELL_SIZE;
                         const ctx = mainCanvas.getContext('2d');
                         
-                        // 填充白色背景
                         ctx.fillStyle = '#FFFFFF';
                         ctx.fillRect(0, 0, mainCanvas.width, mainCanvas.height);
-
-                        // 字体设置
-                        ctx.font = 'bold 11px Arial';
+                        ctx.font = 'bold 10px Arial';
                         ctx.textAlign = 'center';
                         ctx.textBaseline = 'middle';
 
-                        // 3. 逐个格子绘制
                         let pixelIndex = 0;
                         for (let i = 0; i < data.length; i += 4) {
-                            let x = (pixelIndex % size) * CELL_SIZE;
-                            let y = Math.floor(pixelIndex / size) * CELL_SIZE;
+                            let x = (pixelIndex % w) * CELL_SIZE;
+                            let y = Math.floor(pixelIndex / w) * CELL_SIZE;
 
-                            if (data[i + 3] >= 128) { // 忽略透明像素
-                                const nearest = findNearestMARDColor(data[i], data[i+1], data[i+2]);
-                                currentPatternColors[nearest.id] = (currentPatternColors[nearest.id] || 0) + 1;
+                            if (data[i + 3] >= 128) {
+                                // Find nearest MARD
+                                let minDistance = Infinity;
+                                let nearestId = "H1";
+                                for (const [id, c] of Object.entries(mardColors)) {
+                                    const cRgb = hexToRgb(c.hex);
+                                    const distance = Math.pow(data[i] - cRgb.r, 2) + Math.pow(data[i+1] - cRgb.g, 2) + Math.pow(data[i+2] - cRgb.b, 2);
+                                    if (distance < minDistance) {
+                                        minDistance = distance; nearestId = id;
+                                    }
+                                }
                                 
-                                // 画色块
+                                currentPatternColors[nearestId] = (currentPatternColors[nearestId] || 0) + 1;
+                                const nearest = mardColors[nearestId];
+                                
                                 ctx.fillStyle = nearest.hex;
                                 ctx.fillRect(x, y, CELL_SIZE, CELL_SIZE);
                                 
-                                // 画网格线 (格子边框)
-                                ctx.strokeStyle = 'rgba(0,0,0,0.2)';
+                                ctx.strokeStyle = 'rgba(0,0,0,0.15)';
                                 ctx.lineWidth = 1;
                                 ctx.strokeRect(x, y, CELL_SIZE, CELL_SIZE);
 
-                                // 写色号
                                 ctx.fillStyle = nearest.textColor;
-                                ctx.fillText(nearest.id, x + CELL_SIZE/2, y + CELL_SIZE/2 + 1);
+                                ctx.fillText(nearestId, x + CELL_SIZE/2, y + CELL_SIZE/2 + 1);
                             }
                             pixelIndex++;
                         }
 
-                        // 4. 导出为图像用于显示和全屏查看
                         const finalImageUrl = mainCanvas.toDataURL("image/jpeg", 0.9);
                         document.getElementById('previewImage').src = finalImageUrl;
                         document.getElementById('viewerImage').src = finalImageUrl;
 
                         document.getElementById('resultCard').classList.remove('hidden');
-                        renderPatternColors();
+                        renderPatternRequirements();
                         
-                        btn.innerHTML = `生成 MARD 色卡图纸 ✨`;
-                        
-                        setTimeout(() => {
-                            document.getElementById('resultCard').scrollIntoView({ behavior: 'smooth', block: 'start' });
-                        }, 150);
+                        btn.innerHTML = `生成高清图纸 ✨`;
+                        setTimeout(() => { document.getElementById('resultCard').scrollIntoView({ behavior: 'smooth', block: 'start' }); }, 150);
                     }
                     img.src = e.target.result;
                 }
                 reader.readAsDataURL(fileInput.files[0]);
-            }, 100); // Give UI time to update loading state
-        }
+            }, 100);
+        };
 
-        function getMARDColorData(id) {
-            return mardColors.find(c => c.id === id);
-        }
-
-        // NEW: Styled Palette Rendering (Matches Reference Image Layout)
-        function renderPatternColors() {
+        function renderPatternRequirements() {
             const list = document.getElementById('patternColorsList');
             list.innerHTML = '';
             
@@ -527,113 +736,45 @@
             sorted.forEach(([id, count]) => {
                 const stock = inventory[id] || 0;
                 const isShort = stock < count;
-                const colorObj = getMARDColorData(id);
+                const c = mardColors[id];
                 
                 const box = document.createElement('div');
-                box.className = 'flex flex-col items-center bg-white p-2 rounded-[16px] border-2 border-pink-50 shadow-sm min-w-[55px]';
+                box.className = 'flex flex-col rounded-xl overflow-hidden shadow-sm border border-black/5 bg-white';
                 
                 box.innerHTML = `
-                    <div class="w-10 h-10 flex items-center justify-center text-[12px] font-black rounded-[8px] shadow-inner mb-1.5" 
-                         style="background-color: ${colorObj.hex}; color: ${colorObj.textColor}; border: 1px solid rgba(0,0,0,0.1)">
-                        ${id}
+                    <div class="h-9 flex items-center justify-center font-black text-xs" style="background-color: ${c.hex}; color: ${c.textColor}">${id}</div>
+                    <div class="py-1 flex flex-col items-center bg-gray-50">
+                        <span class="text-[11px] font-black text-gray-800">x${count}</span>
+                        ${isShort ? `<span class="text-[9px] font-bold text-red-500 bg-red-50 px-1.5 rounded mt-0.5 w-11/12 text-center truncate">缺${count - stock}</span>` : `<span class="text-[9px] font-bold text-green-500 bg-green-50 px-1.5 rounded mt-0.5 w-11/12 text-center">充足</span>`}
                     </div>
-                    <span class="text-[13px] font-black text-gray-800">x${count}</span>
-                    ${isShort ? `<span class="text-[9px] font-bold text-red-500 bg-red-50 px-1.5 rounded mt-0.5">缺${count - stock}</span>` : `<span class="text-[9px] font-bold text-green-500 bg-green-50 px-1.5 rounded mt-0.5">充足</span>`}
                 `;
                 list.appendChild(box);
             });
         }
 
-        function renderColorPicker() {
-            const grid = document.getElementById('colorPickerGrid');
-            grid.innerHTML = '';
-            mardColors.forEach(c => {
-                const div = document.createElement('div');
-                div.className = 'color-grid-item w-full aspect-square rounded-[12px] cursor-pointer shadow-sm transition-all flex items-center justify-center text-[10px] font-black border border-black/10';
-                div.style.backgroundColor = c.hex;
-                div.style.color = c.textColor;
-                div.innerText = c.id;
-                
-                div.onclick = () => {
-                    document.querySelectorAll('.color-grid-item').forEach(el => el.classList.remove('selected'));
-                    div.classList.add('selected');
-                    document.getElementById('selectedMardId').value = c.id;
-                };
-                grid.appendChild(div);
-            });
-        }
-
-        function addToInventory() {
-            const id = document.getElementById('selectedMardId').value;
-            const countInput = document.getElementById('newColorCount');
-            const count = parseInt(countInput.value);
-
-            if (!id) { showModal('忘记选色号啦', '请先在上方选中一种 MARD 色号喵！', 'warning'); return; }
-            if (isNaN(count) || count <= 0) { showModal('数量不对哦', '请输入正确的购买数量~', 'warning'); return; }
-
-            inventory[id] = (inventory[id] || 0) + count;
-            localStorage.setItem('yuniPerlerInventory', JSON.stringify(inventory));
-            renderInventory();
-            showModal('入库成功', `成功存入 <span class="text-pink-500 font-black">${count}</span> 颗色号为 ${id} 的豆豆！\n你的小金库越来越丰富啦 🍓`, 'success');
-            countInput.value = '';
-        }
-
-        function renderInventory() {
-            const list = document.getElementById('inventoryList');
-            list.innerHTML = '';
-            
-            const entries = Object.entries(inventory).filter(([_, count]) => count > 0);
-            document.getElementById('totalColorsCount').textContent = `共集齐 ${entries.length} 色`;
-
-            if (entries.length === 0) {
-                list.innerHTML = `<div class="text-center py-10 flex flex-col items-center justify-center text-pink-300">
-                                    <div class="sticker relative mb-6" style="position:static; transform: scale(1.2)">🍓</div>
-                                    <p class="text-sm font-bold text-[#B39DDB]">仓库空空如也<br>快去买些新豆豆填满它吧~</p>
-                                  </div>`; return;
-            }
-
-            entries.sort((a, b) => b[1] - a[1]).forEach(([id, count]) => {
-                const c = getMARDColorData(id);
-                if (!c) return;
-                const li = document.createElement('li');
-                li.className = 'flex items-center justify-between p-3.5 rounded-[20px] bg-pink-50/40 border border-pink-100 shadow-sm';
-                li.innerHTML = `
-                    <div class="flex items-center gap-3">
-                        <div class="w-10 h-10 rounded-full shadow-inner border border-black/10 flex items-center justify-center text-[10px] font-black" style="background-color: ${c.hex}; color: ${c.textColor}">
-                            ${id}
-                        </div>
-                        <span class="text-[15px] font-extrabold text-gray-700 tracking-wide">MARD ${id}</span>
-                    </div>
-                    <div class="flex items-baseline gap-1 bg-white px-4 py-2 rounded-[14px] border border-pink-100 shadow-sm">
-                        <span class="text-[16px] font-black text-[#FF69B4]">${count}</span><span class="text-[11px] font-bold text-pink-400">颗</span>
-                    </div>`;
-                list.appendChild(li);
-            });
-        }
-
-        function deductFromInventory() {
+        window.deductFromInventory = function() {
             if (Object.keys(currentPatternColors).length === 0) return;
 
             let shortageText = ''; let hasShortage = false;
             for (const id in currentPatternColors) {
                 const needed = currentPatternColors[id]; const have = inventory[id] || 0;
                 if (have < needed) {
-                    hasShortage = true; const c = getMARDColorData(id);
+                    hasShortage = true; const c = mardColors[id];
                     shortageText += `<div class="flex justify-between text-sm mb-1.5 font-bold items-center bg-white p-2 rounded-xl shadow-sm border border-pink-50"><span class="flex items-center gap-2"><span class="w-5 h-5 rounded flex items-center justify-center text-[8px] text-[${c.textColor}] border border-black/10 shadow-inner" style="background:${c.hex}"></span>${id}</span> <span class="text-red-500 bg-red-50 px-2 py-0.5 rounded-lg">缺 ${needed - have}颗</span></div>`;
                 }
             }
 
             if (hasShortage) {
-                showModal('库存告急 🚨', `<div class="text-left mb-3 text-gray-600 font-bold border-b-2 border-pink-50 pb-2">以下颜色的豆豆不够啦：</div><div class="max-h-[30vh] overflow-y-auto pr-2 custom-scrollbar">${shortageText}</div><div class="text-left mt-4 text-xs text-[#B39DDB] font-bold bg-[#F3E5F5] p-3 rounded-xl border border-[#E1BEE7]">请先去“我的库存”补充喵~</div>`, 'error'); return;
+                showModal('库存告急 🚨', `<div class="text-left mb-3 text-gray-600 font-bold border-b-2 border-pink-50 pb-2">以下颜色的豆豆不够啦：</div><div class="max-h-[30vh] overflow-y-auto pr-2 custom-scrollbar">${shortageText}</div><div class="text-left mt-4 text-xs text-[#B39DDB] font-bold bg-[#F3E5F5] p-3 rounded-xl border border-[#E1BEE7]">请先去“仓库协作”补充云端库存喵~</div>`, 'error'); return;
             }
 
-            showModal('确认完成 🧁', '图纸已经拼好啦？\n确定要从库存中扣掉这些豆豆吗？', 'info', () => {
+            showModal('确认完成 🧁', '图纸已经拼好啦？\n确定要从云端扣除这些豆豆吗？', 'info', async () => {
                 for (const id in currentPatternColors) inventory[id] -= currentPatternColors[id];
-                localStorage.setItem('yuniPerlerInventory', JSON.stringify(inventory));
-                renderPatternColors(); if (!document.getElementById('tab-inventory').classList.contains('hidden')) renderInventory();
-                setTimeout(() => showModal('太棒了 🍰', '库存扣除成功！\n你的作品一定敲可爱的喵~ 🎀', 'success'), 400);
+                await saveInventoryToCloud();
+                renderPatternRequirements(); 
+                setTimeout(() => showModal('太棒了 🍰', '云端库存扣除成功！\n其他设备的库存也已经同步减少了哦~ 🎀', 'success'), 400);
             });
-        }
+        };
     </script>
 </body>
 </html>
