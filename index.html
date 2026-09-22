@@ -36,7 +36,6 @@
             overflow-x: hidden;
         }
 
-        /* Custom Scrollbar for cute containers */
         .custom-scrollbar::-webkit-scrollbar { width: 6px; }
         .custom-scrollbar::-webkit-scrollbar-track { background: #FFF0F3; border-radius: 10px; }
         .custom-scrollbar::-webkit-scrollbar-thumb { background: #FFB6C1; border-radius: 10px; }
@@ -70,16 +69,16 @@
 
         .color-card {
             aspect-ratio: 1;
-            border-radius: 12px;
+            border-radius: 8px;
             display: flex;
             align-items: center;
             justify-content: center;
             font-weight: 900;
-            font-size: 11px;
+            font-size: 10px;
             cursor: pointer;
             transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
-            border: 2px solid rgba(0,0,0,0.05);
-            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            border: 1px solid rgba(0,0,0,0.1);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
             position: relative;
             user-select: none;
         }
@@ -90,6 +89,7 @@
             border: 3px solid var(--hk-hotpink);
             box-shadow: 0 0 0 3px white, 0 8px 15px rgba(255, 105, 180, 0.4);
         }
+        
         .color-card.selected::after {
             content: '✓';
             position: absolute;
@@ -97,13 +97,13 @@
             right: -6px;
             background: var(--hk-hotpink);
             color: white;
-            width: 18px;
-            height: 18px;
+            width: 16px;
+            height: 16px;
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 10px;
+            font-size: 9px;
             border: 2px solid white;
         }
 
@@ -117,7 +117,6 @@
         }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
-        /* Fullscreen viewer */
         .pan-zoom-container {
             width: 100%;
             height: 100%;
@@ -187,7 +186,6 @@
                     </button>
                 </div>
 
-                <!-- Pattern Result Card -->
                 <div id="resultCard" class="hidden card-pink mt-6">
                     <div class="sticker sticker-tl">🧁</div>
                     <h2 class="text-lg font-extrabold text-gray-800 mb-3 flex items-center gap-2 border-b-2 border-pink-50 pb-3">
@@ -206,6 +204,7 @@
                         </div>
                     </div>
                     
+                    <!-- Hidden canvas for processing high res image -->
                     <canvas id="hiddenCanvas" class="hidden"></canvas>
 
                     <h3 class="text-sm font-black text-pink-500 mb-3 bg-pink-50 inline-flex items-center gap-1 px-3 py-1 rounded-full border border-pink-100">
@@ -235,8 +234,8 @@
                             <label class="block text-sm font-bold text-pink-400 pl-1">1. 点击多选买到的色号</label>
                             <span class="text-xs font-bold text-white bg-pink-400 px-2 py-0.5 rounded-full">已选 <span id="selCount">0</span> 色</span>
                         </div>
-                        <div id="mardColorGrid" class="grid grid-cols-6 sm:grid-cols-8 gap-1.5 max-h-[30vh] overflow-y-auto p-2 bg-pink-50/50 rounded-2xl border-2 border-pink-100 custom-scrollbar">
-                            <!-- Populated by JS -->
+                        <div id="mardColorGrid" class="grid grid-cols-6 sm:grid-cols-8 gap-1.5 max-h-[35vh] overflow-y-auto p-2 bg-pink-50/50 rounded-2xl border-2 border-pink-100 custom-scrollbar">
+                            <!-- Populated by JS with 221 colors -->
                         </div>
                     </div>
 
@@ -282,9 +281,8 @@
         </nav>
     </div>
 
-    <!-- Fullscreen Viewer Modal -->
     <div id="imageViewer" class="fixed inset-0 bg-gray-900/95 backdrop-blur-md z-50 hidden flex-col transition-opacity duration-300 opacity-0">
-        <div class="p-safe pt-4 px-4 pb-2 flex justify-between items-center text-white bg-black/30 shadow-sm border-b border-white/10 shrink-0">
+        <div class="pt-10 px-4 pb-2 flex justify-between items-center text-white bg-black/30 shadow-sm border-b border-white/10 shrink-0">
             <div class="flex items-center gap-2 font-bold text-sm text-pink-200">
                 <i class="ph-bold ph-arrows-out"></i> 可自由滑动与缩放查看
             </div>
@@ -318,155 +316,14 @@
         import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, doc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-        // Generate 221 MARD Colors deterministically
-        const mardColors = {};
-        const seriesData = {
-            'A': { count: 26, r: 255, g: 215, b: 0, step: -5 }, // Yellow/Orange
-            'B': { count: 32, r: 50, g: 205, b: 50, step: -3 }, // Green
-            'C': { count: 29, r: 0, g: 191, b: 255, step: -4 }, // Cyan/Blue
-            'D': { count: 26, r: 138, g: 43, b: 226, step: -3 }, // Purple
-            'E': { count: 24, r: 255, g: 105, b: 180, step: -4 }, // Pink
-            'F': { count: 25, r: 255, g: 69, b: 0, step: -6 },   // Red
-            'G': { count: 21, r: 210, g: 105, b: 30, step: -4 }, // Brown/Skin
-            'H': { count: 23, r: 240, g: 240, b: 240, step: -10 },// Grayscale
-            'M': { count: 15, r: 107, g: 142, b: 35, step: -4 }  // Earth
-        };
-
-        for (const [prefix, config] of Object.entries(seriesData)) {
-            for (let i = 1; i <= config.count; i++) {
-                let r = Math.max(0, Math.min(255, config.r + (i * config.step)));
-                let g = Math.max(0, Math.min(255, config.g + (i * config.step)));
-                let b = Math.max(0, Math.min(255, config.b + (i * config.step)));
-                
-                // Special fixes for pure white/black
-                if (prefix === 'H' && i === 1) { r=255; g=255; b=255; }
-                if (prefix === 'H' && i === 23) { r=0; g=0; b=0; }
-
-                const hex = "#" + (1 << 24 | r << 16 | g << 8 | b).toString(16).slice(1).toUpperCase();
-                
-                // Contrast text calculation
-                const yiq = ((r*299)+(g*587)+(b*114))/1000;
-                const textColor = (yiq >= 128) ? '#000000' : '#FFFFFF';
-                
-                mardColors[`${prefix}${i}`] = { hex, textColor };
-            }
-        }
-
-        // Global State
+        // Global State Variables
         let inventory = {};
         let currentPatternColors = {};
         let selectedColorsForBatch = new Set();
         let db, auth, user;
         const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-yuni-app';
 
-        // Firebase Initialization
-        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {};
-        if (Object.keys(firebaseConfig).length > 0) {
-            const app = initializeApp(firebaseConfig);
-            db = getFirestore(app);
-            auth = getAuth(app);
-            initAuth();
-        } else {
-            document.getElementById('sync-text').textContent = '本地模式';
-            document.getElementById('sync-status').classList.replace('bg-gray-300', 'bg-yellow-400');
-            loadLocalInventory();
-            renderInventoryGrid();
-            renderColorGrid();
-        }
-
-        async function initAuth() {
-            try {
-                if (typeof __initial_auth_token !== 'undefined') {
-                    await signInWithCustomToken(auth, __initial_auth_token);
-                } else {
-                    await signInAnonymously(auth);
-                }
-                user = auth.currentUser;
-                setupRealtimeSync();
-            } catch (error) {
-                console.error("Auth error", error);
-                document.getElementById('sync-text').textContent = '同步失败';
-                document.getElementById('sync-status').classList.replace('bg-gray-300', 'bg-red-500');
-            }
-        }
-
-        function setupRealtimeSync() {
-            if (!user) return;
-            const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'inventory', 'shared');
-            
-            onSnapshot(docRef, (docSnap) => {
-                if (docSnap.exists()) {
-                    inventory = docSnap.data();
-                } else {
-                    inventory = {};
-                }
-                renderInventoryGrid();
-                renderColorGrid(); // Refresh selections/counts context if needed
-                document.getElementById('sync-text').textContent = '已云同步';
-                document.getElementById('sync-status').classList.replace('bg-gray-300', 'bg-green-400');
-            }, (error) => {
-                console.error("Sync error", error);
-                document.getElementById('sync-text').textContent = '同步断开';
-                document.getElementById('sync-status').classList.replace('bg-green-400', 'bg-red-500');
-            });
-        }
-
-        async function saveInventoryToCloud() {
-            if (db && user) {
-                try {
-                    const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'inventory', 'shared');
-                    await setDoc(docRef, inventory);
-                } catch (e) {
-                    console.error("Save to cloud failed", e);
-                    showModal('同步失败', '无法保存到云端，请检查网络 🥲', 'error');
-                }
-            } else {
-                localStorage.setItem('yuniPerlerInventory', JSON.stringify(inventory));
-            }
-        }
-
-        function loadLocalInventory() {
-            inventory = JSON.parse(localStorage.getItem('yuniPerlerInventory')) || {};
-        }
-
-        // Expose functions to window for HTML onclick attributes
-        window.switchTab = function(tabId) {
-            document.getElementById('tab-maker').classList.add('hidden');
-            document.getElementById('tab-inventory').classList.add('hidden');
-            document.getElementById(`tab-${tabId}`).classList.remove('hidden');
-
-            const makerBtn = document.getElementById('nav-maker');
-            const invBtn = document.getElementById('nav-inventory');
-            makerBtn.className = "nav-btn flex flex-col items-center p-2.5 transition-colors " + (tabId==='maker' ? "text-pink-500 active" : "text-pink-200 hover:text-pink-400");
-            invBtn.className = "nav-btn flex flex-col items-center p-2.5 transition-colors " + (tabId==='inventory' ? "text-pink-500 active" : "text-pink-200 hover:text-pink-400");
-        };
-
-        window.updateFileName = function() {
-            const input = document.getElementById('imageInput');
-            const nameDisplay = document.getElementById('fileName');
-            if (input.files && input.files.length > 0) {
-                nameDisplay.textContent = input.files[0].name;
-                nameDisplay.classList.replace('text-pink-300', 'text-pink-600');
-            }
-        };
-
-        window.openViewer = function() {
-            const viewer = document.getElementById('imageViewer');
-            viewer.classList.remove('hidden');
-            viewer.style.display = 'flex';
-            setTimeout(() => viewer.classList.remove('opacity-0'), 10);
-        };
-
-        window.closeViewer = function() {
-            const viewer = document.getElementById('imageViewer');
-            viewer.classList.add('opacity-0');
-            setTimeout(() => {
-                viewer.classList.add('hidden');
-                viewer.style.display = 'none';
-            }, 300);
-        };
-
-        // UI Modals
+        // Custom Modal UI Functions
         window.showModal = function(title, message, type = 'info', confirmCallback = null, withInput = false, initialInputValue = '') {
             const modal = document.getElementById('customModal');
             document.getElementById('modalTitle').textContent = title;
@@ -524,15 +381,151 @@
             setTimeout(() => modal.classList.add('hidden'), 300);
         };
 
-        // Inventory Grid Render
+        const MARD_PALETTE = {
+            "A1": "#FAF4C8", "A2": "#FFFFD5", "A3": "#FEFF8B", "A4": "#FBED56", "A5": "#F4D738", "A6": "#FEAC4C", "A7": "#FE8B4C", "A8": "#FFDA45", "A9": "#FF995B", "A10": "#F77C31", "A11": "#FFDD99", "A12": "#FE9F72", "A13": "#FFC365", "A14": "#FD543D", "A15": "#FFF365", "A16": "#FFFF9F", "A17": "#FFE36E", "A18": "#FEBE7D", "A19": "#FD7C72", "A20": "#FFD568", "A21": "#FFE395", "A22": "#F4F57D", "A23": "#E6C9B7", "A24": "#F7F8A2", "A25": "#FFD67D", "A26": "#FFC830",
+            "B1": "#E6EE31", "B2": "#63F347", "B3": "#9EF780", "B4": "#5DE035", "B5": "#35E352", "B6": "#65E2A6", "B7": "#3DAF80", "B8": "#1C9C4F", "B9": "#27523A", "B10": "#95D3C2", "B11": "#5D722A", "B12": "#166F41", "B13": "#CAEB7B", "B14": "#ADE946", "B15": "#2E5132", "B16": "#C5ED9C", "B17": "#9BB13A", "B18": "#E6EE49", "B19": "#24B88C", "B20": "#C2F0CC", "B21": "#156A6B", "B22": "#0B3C43", "B23": "#303A21", "B24": "#EEFCA5", "B25": "#4E846D", "B26": "#8D7A35", "B27": "#CCE1AF", "B28": "#9EE5B9", "B29": "#C5E254", "B30": "#E2FCB1", "B31": "#B0E792", "B32": "#9CAB5A",
+            "C1": "#E8FFE7", "C2": "#A9F9FC", "C3": "#A0E2FB", "C4": "#41CCFF", "C5": "#01ACEB", "C6": "#50AAF0", "C7": "#3677D2", "C8": "#0F54C0", "C9": "#324BCA", "C10": "#3EBCE2", "C11": "#28DDDE", "C12": "#1C334D", "C13": "#CDE8FF", "C14": "#D5FDFF", "C15": "#22C4C6", "C16": "#1557A8", "C17": "#04D1F6", "C18": "#1D3344", "C19": "#1887A2", "C20": "#176DAF", "C21": "#BEDDFF", "C22": "#67B4BE", "C23": "#C8E2FF", "C24": "#7CC4FF", "C25": "#A9E5E5", "C26": "#3CAED8", "C27": "#D3DFFA", "C28": "#BBCFED", "C29": "#34488E",
+            "D1": "#AEB4F2", "D2": "#858EDD", "D3": "#2F54AF", "D4": "#182A84", "D5": "#B843C5", "D6": "#AC7BDE", "D7": "#8854B3", "D8": "#E2D3FF", "D9": "#D5B9F8", "D10": "#361851", "D11": "#B9BAE1", "D12": "#DE9AD4", "D13": "#B90095", "D14": "#8B279B", "D15": "#2F1F90", "D16": "#E3E1EE", "D17": "#C4D4F6", "D18": "#A45EC7", "D19": "#D8C3D7", "D20": "#9C32B2", "D21": "#9A009B", "D22": "#333A95", "D23": "#EBDAFC", "D24": "#7786E5", "D25": "#494FC7", "D26": "#DFC2F8",
+            "E1": "#FDD3CC", "E2": "#FEC0DF", "E3": "#FFB7E7", "E4": "#E8649E", "E5": "#F551A2", "E6": "#F13D74", "E7": "#C63478", "E8": "#FFDBE9", "E9": "#E970CC", "E10": "#D33793", "E11": "#FCDDD2", "E12": "#F78FC3", "E13": "#B5006D", "E14": "#FFD1BA", "E15": "#F8C7C9", "E16": "#FFF3EB", "E17": "#FFE2EA", "E18": "#FFC7DB", "E19": "#FEBAD5", "E20": "#D8C7D1", "E21": "#BD9DA1", "E22": "#B785A1", "E23": "#937A8D", "E24": "#E1BCE8",
+            "F1": "#FD957B", "F2": "#FC3D46", "F3": "#F74941", "F4": "#FC283C", "F5": "#E7002F", "F6": "#943630", "F7": "#971937", "F8": "#BC0028", "F9": "#E2677A", "F10": "#8A4526", "F11": "#5A2121", "F12": "#FD4E6A", "F13": "#F35744", "F14": "#FFA0AD", "F15": "#D30022", "F16": "#FEC2A6", "F17": "#E69C79", "F18": "#D37C46", "F19": "#C1444A", "F20": "#CD9391", "F21": "#F7B4C6", "F22": "#FDC0D0", "F23": "#F67E66", "F24": "#E698AA", "F25": "#E54B4F",
+            "G1": "#FFE2CE", "G2": "#FFC4AA", "G3": "#F4C3A5", "G4": "#E1B383", "G5": "#EDB045", "G6": "#E99C17", "G7": "#9D5B3E", "G8": "#753832", "G9": "#E6B483", "G10": "#D98C39", "G11": "#E0C593", "G12": "#FFC890", "G13": "#B7714A", "G14": "#8D614C", "G15": "#FCF9E0", "G16": "#F2D9BA", "G17": "#78524B", "G18": "#FFE4CC", "G19": "#E07935", "G20": "#A94023", "G21": "#B8855B",
+            "H1": "#FDFBFF", "H2": "#FEFFFF", "H3": "#B6B1BA", "H4": "#89858C", "H5": "#48464E", "H6": "#2F2B2F", "H7": "#000000", "H8": "#E7D6DB", "H9": "#EDEDED", "H10": "#EEE9EA", "H11": "#CECDD5", "H12": "#FFF5ED", "H13": "#F5ECD2", "H14": "#CFD7D3", "H15": "#98A6A8", "H16": "#1D1414", "H17": "#F1EDED", "H18": "#FFFDF0", "H19": "#F6EFE2", "H20": "#949FA3", "H21": "#FFFBE1", "H22": "#CACAD4", "H23": "#9A9D94",
+            "M1": "#BCC6B8", "M2": "#8AA386", "M3": "#697D80", "M4": "#E3D2BC", "M5": "#D0CCAA", "M6": "#B0A782", "M7": "#B4A497", "M8": "#B38281", "M9": "#A58767", "M10": "#C5B2BC", "M11": "#9F7594", "M12": "#644749", "M13": "#D19066", "M14": "#C77362", "M15": "#757D78"
+        };
+
+        // Cache luminance objects for text colors
+        const colorsData = {};
+        for (const [id, hex] of Object.entries(MARD_PALETTE)) {
+            const r = parseInt(hex.slice(1,3), 16);
+            const g = parseInt(hex.slice(3,5), 16);
+            const b = parseInt(hex.slice(5,7), 16);
+            const yiq = ((r*299)+(g*587)+(b*114))/1000;
+            const textColor = (yiq >= 128) ? '#000000' : '#FFFFFF';
+            colorsData[id] = { hex, textColor };
+        }
+
+        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {};
+        if (Object.keys(firebaseConfig).length > 0) {
+            const app = initializeApp(firebaseConfig);
+            db = getFirestore(app);
+            auth = getAuth(app);
+            initAuth();
+        } else {
+            document.getElementById('sync-text').textContent = '本地模式';
+            document.getElementById('sync-status').classList.replace('bg-gray-300', 'bg-yellow-400');
+            loadLocalInventory();
+            renderInventoryGrid();
+            renderColorGrid();
+        }
+
+        async function initAuth() {
+            try {
+                if (typeof __initial_auth_token !== 'undefined') {
+                    await signInWithCustomToken(auth, __initial_auth_token);
+                } else {
+                    await signInAnonymously(auth);
+                }
+                user = auth.currentUser;
+                setupRealtimeSync();
+            } catch (error) {
+                console.error("Auth error", error);
+                document.getElementById('sync-text').textContent = '同步失败';
+                document.getElementById('sync-status').classList.replace('bg-gray-300', 'bg-red-500');
+            }
+        }
+
+        function setupRealtimeSync() {
+            if (!user) return;
+            const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'inventory_docs', 'shared');
+            
+            onSnapshot(docRef, (docSnap) => {
+                if (docSnap.exists()) {
+                    inventory = docSnap.data();
+                } else {
+                    inventory = {};
+                }
+                renderInventoryGrid();
+                renderColorGrid();
+                document.getElementById('sync-text').textContent = '已云同步';
+                document.getElementById('sync-status').classList.replace('bg-gray-300', 'bg-green-400');
+            }, (error) => {
+                console.error("Sync error", error);
+                document.getElementById('sync-text').textContent = '同步断开';
+                document.getElementById('sync-status').classList.replace('bg-green-400', 'bg-red-500');
+            });
+        }
+
+        async function saveInventoryToCloud() {
+            if (db && user) {
+                try {
+                    const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'inventory_docs', 'shared');
+                    await setDoc(docRef, inventory);
+                } catch (e) {
+                    console.error("Save to cloud failed", e);
+                    showModal('同步失败', '无法保存到云端，请检查网络 🥲', 'error');
+                }
+            } else {
+                localStorage.setItem('yuniPerlerInventory', JSON.stringify(inventory));
+            }
+        }
+
+        function loadLocalInventory() {
+            inventory = JSON.parse(localStorage.getItem('yuniPerlerInventory')) || {};
+        }
+
+        window.switchTab = function(tabId) {
+            document.getElementById('tab-maker').classList.add('hidden');
+            document.getElementById('tab-inventory').classList.add('hidden');
+            document.getElementById(`tab-${tabId}`).classList.remove('hidden');
+
+            const makerBtn = document.getElementById('nav-maker');
+            const invBtn = document.getElementById('nav-inventory');
+            makerBtn.className = "nav-btn flex flex-col items-center p-2.5 transition-colors " + (tabId==='maker' ? "text-pink-500 active" : "text-pink-200 hover:text-pink-400");
+            invBtn.className = "nav-btn flex flex-col items-center p-2.5 transition-colors " + (tabId==='inventory' ? "text-pink-500 active" : "text-pink-200 hover:text-pink-400");
+        };
+
+        window.updateFileName = function() {
+            const input = document.getElementById('imageInput');
+            const nameDisplay = document.getElementById('fileName');
+            if (input.files && input.files.length > 0) {
+                nameDisplay.textContent = input.files[0].name;
+                nameDisplay.classList.replace('text-pink-300', 'text-pink-600');
+            }
+        };
+
+        window.openViewer = function() {
+            const viewer = document.getElementById('imageViewer');
+            viewer.classList.remove('hidden');
+            viewer.style.display = 'flex';
+            setTimeout(() => viewer.classList.remove('opacity-0'), 10);
+        };
+
+        window.closeViewer = function() {
+            const viewer = document.getElementById('imageViewer');
+            viewer.classList.add('opacity-0');
+            setTimeout(() => {
+                viewer.classList.add('hidden');
+                viewer.style.display = 'none';
+            }, 300);
+        };
+
         function renderColorGrid() {
             const grid = document.getElementById('mardColorGrid');
-            if(grid.children.length > 0 && selectedColorsForBatch.size === 0) return; // Prevent full re-render if empty selection
+            if(grid.children.length > 0 && selectedColorsForBatch.size === 0) return;
             
             grid.innerHTML = '';
-            // Render all 221 colors
-            Object.keys(mardColors).forEach(id => {
-                const c = mardColors[id];
+            
+            // Sort keys by letter then number
+            const sortedIds = Object.keys(colorsData).sort((a, b) => {
+                const regex = /([A-Z])(\d+)/;
+                const matchA = a.match(regex);
+                const matchB = b.match(regex);
+                if (matchA[1] === matchB[1]) return parseInt(matchA[2]) - parseInt(matchB[2]);
+                return matchA[1].localeCompare(matchB[1]);
+            });
+
+            sortedIds.forEach(id => {
+                const c = colorsData[id];
                 const div = document.createElement('div');
                 const isSelected = selectedColorsForBatch.has(id);
                 div.className = `color-card ${isSelected ? 'selected' : ''}`;
@@ -575,11 +568,10 @@
             
             showModal('入库成功 📦', `成功为 ${selectedColorsForBatch.size} 种颜色分别存入了 ${count} 颗豆豆！云端小仓库已同步 ✨`, 'success');
             
-            // Reset
             selectedColorsForBatch.clear();
             document.getElementById('selCount').textContent = '0';
             countInput.value = '';
-            renderColorGrid(); // clear selections visually
+            renderColorGrid(); 
         };
 
         function renderInventoryGrid() {
@@ -594,15 +586,15 @@
                 return;
             }
 
-            // Sort alphabetically (A1, A2...)
             entries.sort((a, b) => {
                 const regex = /([A-Z])(\d+)/;
                 const matchA = a[0].match(regex);
                 const matchB = b[0].match(regex);
+                if (!matchA || !matchB) return a[0].localeCompare(b[0]);
                 if (matchA[1] === matchB[1]) return parseInt(matchA[2]) - parseInt(matchB[2]);
                 return matchA[1].localeCompare(matchB[1]);
             }).forEach(([id, count]) => {
-                const c = mardColors[id];
+                const c = colorsData[id];
                 if (!c) return;
                 
                 const card = document.createElement('div');
@@ -620,7 +612,7 @@
         function editInventoryItem(id, currentCount) {
             showModal(`修改 [${id}] 库存`, '请输入新的数量，设置为 0 即可删除该颜色。', 'info', async (newCount) => {
                 if (newCount === null || isNaN(newCount) || newCount < 0) {
-                    showModal('数量无效', '修改取消了哦~', 'warning');
+                    showModal('取消修改', '库存修改取消了哦~', 'warning');
                     return;
                 }
                 if (newCount === 0) {
@@ -632,7 +624,10 @@
             }, true, currentCount);
         }
 
-        // Image Processing & Pattern Generation (Maintained from before)
+        function hexToRgbArr(hex) {
+            return [parseInt(hex.slice(1,3), 16), parseInt(hex.slice(3,5), 16), parseInt(hex.slice(5,7), 16)];
+        }
+
         window.processImage = function() {
             const fileInput = document.getElementById('imageInput');
             const gridSelect = document.getElementById('gridSize');
@@ -654,7 +649,6 @@
                         const tempCanvas = document.createElement('canvas');
                         const tempCtx = tempCanvas.getContext('2d');
                         
-                        // Calculate proportional height
                         const ratio = img.height / img.width;
                         const w = size;
                         const h = Math.round(size * ratio);
@@ -666,6 +660,7 @@
                         const data = imgData.data;
                         currentPatternColors = {};
 
+                        // High definition rendering canvas
                         const CELL_SIZE = 24;
                         const mainCanvas = document.getElementById('hiddenCanvas');
                         mainCanvas.width = w * CELL_SIZE;
@@ -684,33 +679,38 @@
                             let y = Math.floor(pixelIndex / w) * CELL_SIZE;
 
                             if (data[i + 3] >= 128) {
-                                // Find nearest MARD
                                 let minDistance = Infinity;
                                 let nearestId = "H1";
-                                for (const [id, c] of Object.entries(mardColors)) {
-                                    const cRgb = hexToRgb(c.hex);
-                                    const distance = Math.pow(data[i] - cRgb.r, 2) + Math.pow(data[i+1] - cRgb.g, 2) + Math.pow(data[i+2] - cRgb.b, 2);
+                                
+                                for (const [id, c] of Object.entries(colorsData)) {
+                                    const cRgb = hexToRgbArr(c.hex);
+                                    // Euclidean distance for color match
+                                    const distance = Math.pow(data[i] - cRgb[0], 2) + Math.pow(data[i+1] - cRgb[1], 2) + Math.pow(data[i+2] - cRgb[2], 2);
                                     if (distance < minDistance) {
                                         minDistance = distance; nearestId = id;
                                     }
                                 }
                                 
                                 currentPatternColors[nearestId] = (currentPatternColors[nearestId] || 0) + 1;
-                                const nearest = mardColors[nearestId];
+                                const nearest = colorsData[nearestId];
                                 
+                                // Draw cell
                                 ctx.fillStyle = nearest.hex;
                                 ctx.fillRect(x, y, CELL_SIZE, CELL_SIZE);
                                 
+                                // Draw grid line
                                 ctx.strokeStyle = 'rgba(0,0,0,0.15)';
                                 ctx.lineWidth = 1;
                                 ctx.strokeRect(x, y, CELL_SIZE, CELL_SIZE);
 
+                                // Draw ID text
                                 ctx.fillStyle = nearest.textColor;
                                 ctx.fillText(nearestId, x + CELL_SIZE/2, y + CELL_SIZE/2 + 1);
                             }
                             pixelIndex++;
                         }
 
+                        // Generate viewer image
                         const finalImageUrl = mainCanvas.toDataURL("image/jpeg", 0.9);
                         document.getElementById('previewImage').src = finalImageUrl;
                         document.getElementById('viewerImage').src = finalImageUrl;
@@ -736,7 +736,7 @@
             sorted.forEach(([id, count]) => {
                 const stock = inventory[id] || 0;
                 const isShort = stock < count;
-                const c = mardColors[id];
+                const c = colorsData[id];
                 
                 const box = document.createElement('div');
                 box.className = 'flex flex-col rounded-xl overflow-hidden shadow-sm border border-black/5 bg-white';
@@ -759,7 +759,7 @@
             for (const id in currentPatternColors) {
                 const needed = currentPatternColors[id]; const have = inventory[id] || 0;
                 if (have < needed) {
-                    hasShortage = true; const c = mardColors[id];
+                    hasShortage = true; const c = colorsData[id];
                     shortageText += `<div class="flex justify-between text-sm mb-1.5 font-bold items-center bg-white p-2 rounded-xl shadow-sm border border-pink-50"><span class="flex items-center gap-2"><span class="w-5 h-5 rounded flex items-center justify-center text-[8px] text-[${c.textColor}] border border-black/10 shadow-inner" style="background:${c.hex}"></span>${id}</span> <span class="text-red-500 bg-red-50 px-2 py-0.5 rounded-lg">缺 ${needed - have}颗</span></div>`;
                 }
             }
